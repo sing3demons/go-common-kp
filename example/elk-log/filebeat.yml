@@ -1,0 +1,31 @@
+filebeat.inputs:
+  - type: filestream
+    id: detail-logs
+    enabled: true
+    paths:
+      - /app/logs/detail/*.log
+    fields:
+      kafka_topic: logs.detail
+    json:
+      keys_under_root: true
+      add_error_key: true
+  - type: filestream
+    id: summary-logs
+    enabled: true
+    paths:
+      - /app/logs/summary/*.log
+    fields:
+      kafka_topic: logs.summary
+    json:
+      keys_under_root: true
+      add_error_key: true
+output.kafka:
+  hosts: ["kafka:9092"]
+  topic: "%{[fields.kafka_topic]}"   # 👈 fix field reference
+  codec.format:
+    string: '%{[message]}'
+  partition.round_robin:
+    reachable_only: true
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000
