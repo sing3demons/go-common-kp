@@ -18,6 +18,7 @@ type Context struct {
 	http.ResponseWriter
 	kafka.Client
 	detail logger.CustomLoggerService
+	conf   *config.Config
 }
 type SubscribeFunc func(c *Context) error
 
@@ -62,6 +63,7 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 		Request:        r,
 		ResponseWriter: w,
 		Client:         k,
+		conf:           conf,
 	}
 
 	isHTTP := true
@@ -147,6 +149,14 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 
 	ctx.detail = kpLog
 	return ctx
+}
+
+func (c *Context) GetConfig(key string) string {
+	return c.conf.Get(key)
+}
+
+func (c *Context) GetConfigOrDefault(key, defaultValue string) string {
+	return c.conf.GetOrDefault(key, defaultValue)
 }
 
 func (c *Context) JSON(code int, v any) error {
