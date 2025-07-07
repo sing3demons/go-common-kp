@@ -5,7 +5,7 @@ services:
     # user: root
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./logs:/app/logs:ro
+      - ../logs:/app/logs:ro
     environment:
       - KAFKA_HOST=kafka:9092
     networks:

@@ -1,5 +1,15 @@
 filebeat.inputs:
   - type: filestream
+    id: app-logs
+    enabled: true
+    paths:
+      - /app/logs/app/*.log
+    fields:
+      kafka_topic: logs.app
+    json:
+      keys_under_root: true
+      add_error_key: true
+  - type: filestream
     id: detail-logs
     enabled: true
     paths:
