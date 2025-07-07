@@ -12,6 +12,6 @@
 # version 1.0.2
     - [kp.context] fix bug
 
-# version 1.0.2
+# version 1.0.3
     - [kp.context] add info method to context
     - [kp.context] add app log to context   
