@@ -49,7 +49,6 @@ type LogService struct {
 }
 
 func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService, conf *config.Config) *Context {
-	log.appLog.Debugf("configuring context for request", conf)
 	c := r.Context()
 	if c == nil {
 		c = context.Background()
