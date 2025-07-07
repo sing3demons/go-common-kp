@@ -116,17 +116,16 @@ func (e *EnvLoader) read(folder string) *Config {
 			AppPort: e.GetOrDefault("SERVER_APP_PORT", "8080"),
 			AppHost: e.GetOrDefault("SERVER_APP_HOST", "localhost"),
 			Https:   parseBool("SERVER_HTTPS", false),
-			Cert:    e.GetOrDefault("SERVER_CERT", "./cert.pem"),
-			Key:     e.GetOrDefault("SERVER_KEY", "./key.pem"),
+			Cert:    e.Get("SERVER_CERT"),
+			Key:     e.Get("SERVER_KEY"),
 		},
 		Kafka: KafkaConfig{
 			Broker:          e.GetOrDefault("KAFKA_BROKER", ""),
-			BatchSize: parseInt("KAFKA_BATCH_SIZE", 100),
+			BatchSize:       parseInt("KAFKA_BATCH_SIZE", 100),
 			BatchBytes:      parseInt("KAFKA_BATCH_BYTES", 1048576),
 			BatchTimeout:    parseInt("KAFKA_BATCH_TIMEOUT", 1000),
 			ConsumerGroupID: e.GetOrDefault("KAFKA_CONSUMER_GROUP_ID", "default-group"),
 			Partition:       parseInt("KAFKA_PARTITION", 0),
-
 		},
 		TracerHost: e.GetOrDefault("TRACER_HOST", "localhost:4317"),
 	}
@@ -136,7 +135,6 @@ func (e *EnvLoader) read(folder string) *Config {
 			log.Fatalf("Failed to create default .env file: %v", err)
 		}
 	}
-
 
 	return cfg
 }

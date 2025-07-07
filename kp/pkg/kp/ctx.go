@@ -125,28 +125,6 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 		}
 	}
 
-	// kpLog.Init(commonlog.LogDto{
-	// 	Channel:          "none",
-	// 	UseCase:          "none",
-	// 	UseCaseStep:      "none",
-	// 	Broker:           broker,
-	// 	TransactionId:    ctx.Request.TransactionId(),
-	// 	SessionId:        ctx.Request.SessionId(),
-	// 	RequestId:        ctx.Request.RequestId(),
-	// 	AppName:          conf.App.Name,
-	// 	ComponentVersion: conf.App.Version,
-	// 	ComponentName:    conf.App.ComponentName,
-	// 	Instance:         ctx.Request.HostName(),
-	// 	// DateTime:         time.Now().Format(time.RFC3339),
-	// 	OriginateServiceName: func() string {
-	// 		if w != nil {
-	// 			return "HTTP Service"
-	// 		}
-	// 		return "Event Source"
-	// 	}(),
-	// 	RecordType: "detail",
-	// })
-
 	ctx.detail = kpLog
 	return ctx
 }

@@ -39,10 +39,6 @@ func otelMiddleware(handler http.Handler) http.Handler {
 		ctx, span := tr.Start(ctx, spanName)
 		defer span.End()
 
-		fmt.Println("Span started for: ---> ", spanName)
-		fmt.Println("TraceID:", span.SpanContext().TraceID().String())
-		fmt.Println("SpanID:", span.SpanContext().SpanID().String())
-
 		span.SetAttributes(
 			attribute.String("http.method", r.Method),
 			attribute.String("http.url", r.URL.String()),
@@ -72,9 +68,12 @@ func newHTTPServer(conf *config.Config, tp *sdktrace.TracerProvider) *httpServer
 		router:      router,
 		port:        conf.Server.AppPort,
 		srv:         srv,
-		certFile:    conf.Server.Cert,
-		keyFile:     conf.Server.Key,
 		staticFiles: make(map[string]string),
+	}
+
+	if conf.Server.Https {
+		httpSrv.certFile = conf.Server.Cert
+		httpSrv.keyFile = conf.Server.Key
 	}
 
 	return httpSrv

@@ -100,14 +100,18 @@ type IApplication interface {
 	LogSummary(logger logger.LoggerService)
 }
 
-func NewApplication(conf *config.Config, log logger.ILogger) IApplication {
-	noopLogger := logger.NewDefaultLoggerService()
+func NewApplication(conf *config.Config) IApplication {
+	// noopLogger := logger.NewDefaultLoggerService()
+
+	logApp := logger.NewLogger(conf.Log.App)
+	logDetail := logger.NewLogger(conf.Log.Detail)
+	logSummary := logger.NewLogger(conf.Log.Summary)
 
 	var traceProvider *trace.TracerProvider
 	if conf.TracerHost != "" {
 		tp, err := startTracing(conf.App.Name, conf.TracerHost)
 		if err != nil {
-			log.Errorf("Failed to start tracing: %v", err)
+			logApp.Errorf("Failed to start tracing: %v", err)
 		} else {
 			traceProvider = tp
 
@@ -118,9 +122,9 @@ func NewApplication(conf *config.Config, log logger.ILogger) IApplication {
 
 	app := &App{
 		conf:           conf,
-		AppLog:         log,
-		DetailLog:      noopLogger,
-		SummaryLog:     noopLogger,
+		AppLog:         logApp,
+		DetailLog:      logDetail,
+		SummaryLog:     logSummary,
 		maskingService: logger.NewMaskingService(),
 	}
 
@@ -131,6 +135,7 @@ func NewApplication(conf *config.Config, log logger.ILogger) IApplication {
 }
 
 func (a *App) StartKafka() {
+	a.AppLog.Debug("Starting Kafka client...")
 
 	if a.conf.Kafka.Broker == "" {
 		panic("Kafka broker is not configured.")
@@ -150,7 +155,7 @@ func (a *App) StartKafka() {
 		detailLog:      a.DetailLog,
 		summaryLog:     a.SummaryLog,
 	}, a.conf)
-	fmt.Println("Kafka client initialized...")
+	a.AppLog.Debug(fmt.Sprintf("Kafka client initialized with broker: %s", a.conf.Kafka.Broker))
 
 }
 
@@ -180,29 +185,29 @@ func (a *App) Delete(pattern string, handler Handler) {
 
 func (a *App) Consumer(topic string, handler SubscribeFunc) {
 	if a.kafkaClient == nil {
-		fmt.Println("Kafka client is not initialized.")
+		a.AppLog.Debug("Kafka client is not initialized.")
 		return
 	}
 
 	if _, exists := a.kafkaClient.subscriptions[topic]; exists {
-		fmt.Printf("Subscription for topic %s already exists.\n", topic)
+		a.AppLog.Debug(fmt.Sprintf("Subscription for topic %s already exists.", topic))
 		return
 	}
 
 	a.kafkaClient.subscriptions[topic] = handler
-	fmt.Printf("Subscribed to topic %s successfully.\n", topic)
+	a.AppLog.Debug(fmt.Sprintf("Subscribed to topic %s successfully.", topic))
 }
 
 func (a *App) CreateTopic(topic string) {
 	if a.kafkaClient == nil {
-		fmt.Println("Kafka client is not initialized.")
+		a.AppLog.Debug("Kafka client is not initialized.")
 		return
 	}
 
 	if err := a.kafkaClient.kafkaClient.CreateTopic(context.Background(), topic); err != nil {
-		fmt.Printf("Error creating topic %s: %v\n", topic, err)
+		a.AppLog.Debug(fmt.Sprintf("Error creating topic %s: %v", topic, err))
 	} else {
-		fmt.Printf("Topic %s created successfully.\n", topic)
+		a.AppLog.Debug(fmt.Sprintf("Topic %s created successfully.", topic))
 	}
 }
 
@@ -298,6 +303,10 @@ func (a *App) Start() {
 			a.AppLog.Debug("Server shutdown completed successfully.")
 		}
 	}()
+
+	defer a.AppLog.Sync()
+	defer a.DetailLog.Sync()
+	defer a.SummaryLog.Sync()
 
 	wg.Wait()
 }
