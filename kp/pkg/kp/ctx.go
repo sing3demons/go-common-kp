@@ -19,6 +19,7 @@ type Context struct {
 	kafka.Client
 	detail logger.CustomLoggerService
 	conf   *config.Config
+	appLog logger.LoggerService
 }
 type SubscribeFunc func(c *Context) error
 
@@ -64,6 +65,7 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 		ResponseWriter: w,
 		Client:         k,
 		conf:           conf,
+		appLog:         log.appLog,
 	}
 
 	isHTTP := true
@@ -127,6 +129,69 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 
 	ctx.detail = kpLog
 	return ctx
+}
+
+type AppLogStruct struct {
+	LogType     string `json:"logType"`
+	LogLevel    string `json:"logLevel"`
+	Message     string `json:"message"`
+	ServiceName string `json:"serviceName"`
+	RequestId   string `json:"requestId"`
+	SessionId   string `json:"sessionId"`
+}
+
+func (c *Context) Info(msg any) {
+	jsonMsg, err := json.Marshal(msg)
+	if err != nil {
+		jsonMsg = []byte("failed to marshal message")
+	}
+
+	appLog := AppLogStruct{
+		LogType:     "app",
+		LogLevel:    "info",
+		Message:     string(jsonMsg),
+		ServiceName: c.conf.App.Name,
+		RequestId:   c.RequestId(),
+		SessionId:   c.SessionId(),
+	}
+	strMsg, _ := json.Marshal(appLog)
+	c.appLog.Info(string(strMsg))
+}
+
+func (c *Context) Debug(msg any) {
+	jsonMsg, err := json.Marshal(msg)
+	if err != nil {
+		jsonMsg = []byte("failed to marshal message")
+	}
+
+	appLog := AppLogStruct{
+		LogType:     "app",
+		LogLevel:    "debug",
+		Message:     string(jsonMsg),
+		ServiceName: c.conf.App.Name,
+		RequestId:   c.RequestId(),
+		SessionId:   c.SessionId(),
+	}
+	strMsg, _ := json.Marshal(appLog)
+	c.appLog.Debug(string(strMsg))
+}
+
+func (c *Context) Error(msg any) {
+	jsonMsg, err := json.Marshal(msg)
+	if err != nil {
+		jsonMsg = []byte("failed to marshal message")
+	}
+
+	appLog := AppLogStruct{
+		LogType:     "app",
+		LogLevel:    "error",
+		Message:     string(jsonMsg),
+		ServiceName: c.conf.App.Name,
+		RequestId:   c.RequestId(),
+		SessionId:   c.SessionId(),
+	}
+	strMsg, _ := json.Marshal(appLog)
+	c.appLog.Error(string(strMsg))
 }
 
 func (c *Context) GetConfig(key string) string {

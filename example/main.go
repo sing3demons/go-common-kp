@@ -16,9 +16,10 @@ func main() {
 	}
 
 	app := kp.NewApplication(conf)
-	app.StartKafka()
+	// app.StartKafka()
 
 	app.Get("/healthz", func(ctx *kp.Context) error {
+		ctx.Info("Health check endpoint hit")
 		return ctx.JSON(200, "OK")
 	})
 

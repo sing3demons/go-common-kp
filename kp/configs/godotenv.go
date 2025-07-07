@@ -81,6 +81,8 @@ func (e *EnvLoader) read(folder string) *Config {
 		}
 	}
 
+	const formatDateDefault = "YYYY-MM-DD-HH"
+
 	cfg := &Config{
 		App: App{
 			Name:           e.GetOrDefault("APP_NAME", ""),
@@ -91,13 +93,23 @@ func (e *EnvLoader) read(folder string) *Config {
 			SchemaVersion:  e.GetOrDefault("APP_SCHEMA_VERSION", "1.0"),
 		},
 		Log: Log{
+			App: LogConfig{
+				Level:             e.GetOrDefault("LOG_APP_LEVEL", "debug"),
+				EnableFileLogging: parseBool("LOG_APP_ENABLE_FILE_LOGGING", false),
+				LogFileProperties: LogFileProperties{
+					Dirname:     e.GetOrDefault("LOG_APP_DIRNAME", "./logs/app"),
+					Filename:    e.GetOrDefault("LOG_APP_FILENAME", "app-%DATE%"),
+					DatePattern: e.GetOrDefault("LOG_APP_DATE_PATTERN", formatDateDefault),
+					Extension:   e.GetOrDefault("LOG_APP_EXTENSION", ".log"),
+				},
+			},
 			Detail: LogConfig{
 				Level:             e.GetOrDefault("LOG_DETAIL_LEVEL", "debug"),
 				EnableFileLogging: parseBool("LOG_DETAIL_ENABLE_FILE_LOGGING", true),
 				LogFileProperties: LogFileProperties{
 					Dirname:     e.GetOrDefault("LOG_DETAIL_DIRNAME", "./logs/detail"),
 					Filename:    e.GetOrDefault("LOG_DETAIL_FILENAME", "detail-%DATE%"),
-					DatePattern: e.GetOrDefault("LOG_DETAIL_DATE_PATTERN", "YYYY-MM-DD-HH"),
+					DatePattern: e.GetOrDefault("LOG_DETAIL_DATE_PATTERN", formatDateDefault),
 					Extension:   e.GetOrDefault("LOG_DETAIL_EXTENSION", ".log"),
 				},
 			},
@@ -107,7 +119,7 @@ func (e *EnvLoader) read(folder string) *Config {
 				LogFileProperties: LogFileProperties{
 					Dirname:     e.GetOrDefault("LOG_SUMMARY_DIRNAME", "./logs/summary"),
 					Filename:    e.GetOrDefault("LOG_SUMMARY_FILENAME", "summary-%DATE%"),
-					DatePattern: e.GetOrDefault("LOG_SUMMARY_DATE_PATTERN", "YYYY-MM-DD-HH"),
+					DatePattern: e.GetOrDefault("LOG_SUMMARY_DATE_PATTERN", formatDateDefault),
 					Extension:   e.GetOrDefault("LOG_SUMMARY_EXTENSION", ".log"),
 				},
 			},
@@ -189,6 +201,14 @@ APP_DESCRIPTION=Logging Service
 APP_VERSION=1.0.0
 APP_BASE_API_VERSION=v1
 APP_SCHEMA_VERSION=1.0
+
+# Log - App
+LOG_APP_LEVEL=debug
+LOG_APP_ENABLE_FILE_LOGGING=false
+LOG_APP_DIRNAME=./logs/app
+LOG_APP_FILENAME=app-%DATE%
+LOG_APP_DATE_PATTERN=YYYY-MM-DD-HH
+LOG_APP_EXTENSION=.log
 
 # Log Detail
 LOG_DETAIL_LEVEL=debug

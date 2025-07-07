@@ -107,6 +107,8 @@ func NewApplication(conf *config.Config) IApplication {
 	logDetail := logger.NewLogger(conf.Log.Detail)
 	logSummary := logger.NewLogger(conf.Log.Summary)
 
+	logApp.Info("Initializing application" + conf.App.Name)
+
 	var traceProvider *trace.TracerProvider
 	if conf.TracerHost != "" {
 		tp, err := startTracing(conf.App.Name, conf.TracerHost)
