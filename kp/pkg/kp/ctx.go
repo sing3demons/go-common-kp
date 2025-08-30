@@ -54,7 +54,6 @@ type Request interface {
 	Body() (string, error)
 	Query() url.Values
 	PathParams() map[string]string
-	// LogAuto(masks ...logger.MaskingOptionDto) logger.CustomLoggerService
 }
 
 type LogService struct {
