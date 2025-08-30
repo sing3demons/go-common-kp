@@ -23,6 +23,7 @@ type CustomLoggerService interface {
 }
 type customLoggerService struct {
 	logDto                    LogDto
+	metaData                  Metadata
 	isSetSummaryLogParameters bool
 	additionalSummary         map[string]any
 	summaryLogAdditionalInfo  []Sequence
@@ -75,6 +76,8 @@ func NewCustomLogger(detailLog LoggerService, summaryLog LoggerService, time *Ti
 }
 
 func (c *customLoggerService) Init(data LogDto) {
+	c.metaData = c.logDto.Metadata
+	c.logDto.Metadata = Metadata{}
 	c.logDto = data
 }
 
@@ -91,7 +94,6 @@ func (c *customLoggerService) Update(key string, value any) {
 
 func (c *customLoggerService) Info(action LoggerAction, data any, options ...MaskingOptionDto) {
 	c.detailLog.Info(c.toStr(action, data, options...))
-	c.logDto.Metadata = Metadata{}
 	c.logDto.SubAction = ""
 }
 

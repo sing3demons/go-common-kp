@@ -30,6 +30,7 @@ type Context struct {
 	kafka.Client
 	detail   logger.CustomLoggerService
 	incoming IncomingReq
+	metaData logger.Metadata
 	conf     *config.Config
 	appLog   logger.LoggerService
 }
@@ -104,6 +105,7 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 		SpanId:    spanId,
 	}
 	hostName, _ := os.Hostname()
+	ctx.metaData = meta
 
 	customLog := logger.LogDto{
 		ServiceName:      conf.App.Name,
@@ -111,8 +113,8 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 		ComponentVersion: conf.App.Version,
 		Instance:         hostName,
 		Metadata:         meta,
-		SessionId:        ctx.SessionId(),
-		RequestId:        ctx.RequestId(),
+		SessionId: ctx.SessionId(),
+		RequestId: ctx.RequestId(),
 	}
 	kpLog.Init(customLog)
 	if !isHTTP {
