@@ -20,6 +20,7 @@ type CustomLoggerService interface {
 	Flush()
 	End(code int, message string)
 	SetSummary(params LogEventTag) CustomLoggerService
+	AddField(key string, value any)
 }
 type customLoggerService struct {
 	logDto                    LogDto
@@ -98,7 +99,7 @@ func (c *customLoggerService) Info(action LoggerAction, data any, options ...Mas
 	c.logDto.SubAction = ""
 }
 
-func (c *customLoggerService) CustomField(key string, value any) {
+func (c *customLoggerService) AddField(key string, value any) {
 	c.additionalSummary[key] = value
 }
 
