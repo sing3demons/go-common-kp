@@ -81,4 +81,5 @@ type LogDto struct {
 	ThreadId    uint64 `json:"threadId,omitempty"` // ระบุ thread หรือ goroutine
 	UseCase     string `json:"useCase,omitempty"`  // e.g., "user-authentication", "data-processing"
 	UseCaseStep string `json:"useCaseStep,omitempty"`
+	Flow        any    `json:"flow,omitempty"` // e.g., "login", "checkout"
 }

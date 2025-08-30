@@ -107,12 +107,10 @@ func (s *summaryLogService) Flush(data Stack) {
 				Result: sequences[i].Result,
 			})
 		}
-		jsonBytes, err := json.Marshal(events)
-		if err == nil {
-			s.logDto.Message = string(jsonBytes)
-		}
+		 
 		s.logDto.Sequences = nil
 		sequences = nil
+		s.logDto.Flow = events
 		s.customLogger.summaryLogAdditionalInfo = nil
 	}
 
@@ -124,6 +122,7 @@ func (s *summaryLogService) Flush(data Stack) {
 		s.logger.Info(info)
 	}
 	s.customLogger = nil
+	s.logDto = LogDto{}
 }
 
 func (c *summaryLogService) clearNonSummaryLogParam() {
