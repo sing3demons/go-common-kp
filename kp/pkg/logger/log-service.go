@@ -93,6 +93,7 @@ func (c *customLoggerService) Update(key string, value any) {
 }
 
 func (c *customLoggerService) Info(action LoggerAction, data any, options ...MaskingOptionDto) {
+	c.logDto.Metadata = Metadata{}
 	c.detailLog.Info(c.toStr(action, data, options...))
 	c.logDto.SubAction = ""
 }
@@ -111,13 +112,13 @@ func (c *customLoggerService) toStr(action LoggerAction, data any, options ...Ma
 	return string(jsonBytes)
 }
 func (c *customLoggerService) Debug(action LoggerAction, data any, options ...MaskingOptionDto) {
-	c.detailLog.Debug(c.toStr(action, data, options...))
 	c.logDto.Metadata = Metadata{}
+	c.detailLog.Debug(c.toStr(action, data, options...))
 	c.logDto.SubAction = ""
 }
 func (c *customLoggerService) Error(action LoggerAction, data any, options ...MaskingOptionDto) {
-	c.detailLog.Error(c.toStr(action, data, options...))
 	c.logDto.Metadata = Metadata{}
+	c.detailLog.Error(c.toStr(action, data, options...))
 	c.logDto.SubAction = ""
 }
 func (c *customLoggerService) Flush() {
@@ -202,6 +203,12 @@ func expandResultCode(code int) resultCodeType {
 			StatusCode: strconv.Itoa(http.StatusOK),
 			ResultCode: ConvertTTTTT(strconv.Itoa(code)),
 			Message:    "Success",
+		}
+	case http.StatusCreated:
+		return resultCodeType{
+			StatusCode: strconv.Itoa(http.StatusCreated),
+			ResultCode: ConvertTTTTT(strconv.Itoa(code)),
+			Message:    mapHTTPStatusToSnakeCaseText(code),
 		}
 	case http.StatusBadRequest:
 		return resultCodeType{

@@ -50,8 +50,8 @@ type LogDto struct {
 	ComponentVersion string     `json:"componentVersion,omitempty"` // Version of the component, e.g., "1.0.0"
 	StartTime        *time.Time `json:"-"`                          // Start time of the action
 
-	Action            string     `json:"action"` // Action type, e.g., "HTTP_REQUEST", "DB_REQUEST", etc.
-	ActionDescription string     `json:"actionDescription"`
+	Action            string     `json:"action,omitempty"` // Action type, e.g., "HTTP_REQUEST", "DB_REQUEST", etc.
+	ActionDescription string     `json:"actionDescription,omitempty"`
 	SubAction         string     `json:"subAction,omitempty"`
 	Timestamp         *time.Time `json:"timestamp,omitempty"`
 
