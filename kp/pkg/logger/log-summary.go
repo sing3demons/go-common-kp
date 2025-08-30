@@ -107,11 +107,17 @@ func (s *summaryLogService) Flush(data Stack) {
 				Result: sequences[i].Result,
 			})
 		}
-		 
+
 		s.logDto.Sequences = nil
 		sequences = nil
 		s.logDto.Flow = events
 		s.customLogger.summaryLogAdditionalInfo = nil
+	}
+
+	if len(s.customLogger.additionalSummary) > 0 {
+		for key, value := range s.customLogger.additionalSummary {
+			s.logDto.CustomFields[key] = value
+		}
 	}
 
 	s.clearNonSummaryLogParam()

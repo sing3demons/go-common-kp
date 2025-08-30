@@ -98,6 +98,10 @@ func (c *customLoggerService) Info(action LoggerAction, data any, options ...Mas
 	c.logDto.SubAction = ""
 }
 
+func (c *customLoggerService) CustomField(key string, value any) {
+	c.additionalSummary[key] = value
+}
+
 func (c *customLoggerService) toStr(action LoggerAction, data any, options ...MaskingOptionDto) string {
 	cloned := cloneAndMask(data, options, c.maskingService)
 	c.logDto.Action = action.Action
