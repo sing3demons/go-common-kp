@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -208,6 +209,16 @@ func (r *Request) Params(key string) []string {
 	}
 
 	return result
+}
+
+// pathParams
+func (r *Request) PathParams() map[string]string {
+	return r.pathParams
+}
+
+// Query() url.Values
+func (r *Request) Query() url.Values {
+	return r.req.URL.Query()
 }
 
 func (r *Request) body() ([]byte, error) {

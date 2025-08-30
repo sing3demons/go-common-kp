@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -147,6 +148,15 @@ func (m *Message) Header(key string) string {
 	return "" // Kafka messages do not have headers like HTTP requests
 }
 
+func (m *Message) Query() url.Values {
+	return nil
+}
+
+// PathParams() map[string]string
+func (m *Message) PathParams() map[string]string {
+	return nil
+}
+
 func (m *Message) Body() (string, error) {
 	if len(m.Value) == 0 {
 		return "", errors.New("message value is empty")
@@ -154,6 +164,7 @@ func (m *Message) Body() (string, error) {
 
 	return string(m.Value), nil
 }
+
 // Bind binds the message value to the input variable. The input should be a pointer to a variable.
 func (m *Message) Bind(i any) error {
 	if reflect.ValueOf(i).Kind() != reflect.Ptr {

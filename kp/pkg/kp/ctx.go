@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"os"
 
 	config "github.com/sing3demons/go-common-kp/kp/configs"
@@ -12,14 +13,25 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+type IncomingReq struct {
+	URL     string            `json:"url"`
+	IP      string            `json:"ip"`
+	Headers map[string]string `json:"headers"`
+	Method  string            `json:"method"`
+	Params  map[string]string `json:"params"`
+	Query   map[string]any    `json:"query"`
+	Body    map[string]any    `json:"body"`
+}
+
 type Context struct {
 	context.Context
 	Request
 	http.ResponseWriter
 	kafka.Client
-	detail logger.CustomLoggerService
-	conf   *config.Config
-	appLog logger.LoggerService
+	detail   logger.CustomLoggerService
+	incoming IncomingReq
+	conf     *config.Config
+	appLog   logger.LoggerService
 }
 type SubscribeFunc func(c *Context) error
 
@@ -39,6 +51,9 @@ type Request interface {
 	SessionId() string
 	RequestId() string
 	Body() (string, error)
+	Query() url.Values
+	PathParams() map[string]string
+	// LogAuto(masks ...logger.MaskingOptionDto) logger.CustomLoggerService
 }
 
 type LogService struct {
@@ -124,6 +139,46 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 				"body":   body,
 			})
 		}
+	} else {
+		body := map[string]any{}
+		rawBody, err := r.Body()
+		if err == nil {
+			// convert to map
+			json.Unmarshal([]byte(rawBody), &body)
+		}
+		query := map[string]any{}
+		if r.Query() != nil {
+			for k, v := range r.Query() {
+				query[k] = v
+			}
+		}
+		headers := map[string]string{}
+		for k, v := range ctx.Header() {
+			headers[k] = ""
+			if len(v) > 0 {
+				headers[k] = v[0]
+				if len(v) > 1 {
+					// If multiple values, join them with commas
+					headers[k] = ""
+					for i, val := range v {
+						if i > 0 {
+							headers[k] += ","
+						}
+						headers[k] += val
+					}
+				}
+			}
+		}
+
+		ctx.incoming = IncomingReq{
+			URL:     ctx.URL(),
+			IP:      ctx.ClientIP(),
+			Headers: headers,
+			Method:  ctx.Method(),
+			Params:  ctx.PathParams(),
+			Query:   query,
+			Body:    body,
+		}
 	}
 
 	ctx.detail = kpLog
@@ -201,6 +256,10 @@ func (c *Context) GetConfigOrDefault(key, defaultValue string) string {
 	return c.conf.GetOrDefault(key, defaultValue)
 }
 
+func (c *Context) GetIncoming() IncomingReq {
+	return c.incoming
+}
+
 func (c *Context) JSON(code int, v any) error {
 	if c.ResponseWriter != nil {
 		c.ResponseWriter.Header().Set("Content-Type", "application/json; charset=UTF8")
@@ -215,6 +274,14 @@ func (c *Context) JSON(code int, v any) error {
 	c.detail.End(code, "")
 
 	return nil
+}
+
+func (c *Context) LogAuto(masks ...logger.MaskingOptionDto) logger.CustomLoggerService {
+	if c.incoming.URL != "" && c.incoming.Method != "" {
+		c.detail.Info(logger.NewInbound("client", ""), c.incoming, masks...)
+		c.incoming = IncomingReq{}
+	}
+	return c.detail
 }
 
 func (c *Context) Log() logger.CustomLoggerService {
