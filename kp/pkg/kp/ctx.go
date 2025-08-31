@@ -54,6 +54,8 @@ type Request interface {
 	Body() (string, error)
 	Query() url.Values
 	PathParams() map[string]string
+	Header(key string) string
+	Headers() map[string]string
 }
 
 type LogService struct {
@@ -153,23 +155,7 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 				query[k] = v
 			}
 		}
-		headers := map[string]string{}
-		for k, v := range ctx.Header() {
-			headers[k] = ""
-			if len(v) > 0 {
-				headers[k] = v[0]
-				if len(v) > 1 {
-					// If multiple values, join them with commas
-					headers[k] = ""
-					for i, val := range v {
-						if i > 0 {
-							headers[k] += ","
-						}
-						headers[k] += val
-					}
-				}
-			}
-		}
+		headers := ctx.Headers()
 
 		ctx.incoming = IncomingReq{
 			URL:     ctx.URL(),

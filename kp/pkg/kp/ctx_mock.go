@@ -122,3 +122,18 @@ func (m *MockRequest) PathParams() map[string]string {
 	m.methodsToCallTime["PathParams"]++
 	return m.PathParamsMap
 }
+
+func (m *MockRequest) Header(key string) string {
+	m.methodsToCallTime["Header"]++
+	return m.AddDataStr[key]
+}
+
+// Headers() map[string]string
+func (m *MockRequest) Headers() map[string]string {
+	m.methodsToCallTime["Headers"]++
+	headers := make(map[string]string)
+	for k, v := range m.AddDataStr {
+		headers[k] = v
+	}
+	return headers
+}

@@ -141,7 +141,7 @@ func (m *Message) Referer() string {
 func (m *Message) HostName() string {
 	return "" // Kafka messages do not have a hostname like HTTP requests
 }
-func (m *Message) Headers() map[string]any {
+func (m *Message) Headers() map[string]string {
 	return nil // Kafka messages do not have headers like HTTP requests
 }
 func (m *Message) Header(key string) string {

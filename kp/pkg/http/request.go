@@ -101,13 +101,13 @@ func (r *Request) Header(key string) string {
 }
 
 // Headers returns all headers of the request.
-func (r *Request) Headers() map[string]any {
-	headers := make(map[string]any)
+func (r *Request) Headers() map[string]string {
+	headers := make(map[string]string)
 	for key, values := range r.req.Header {
 		if len(values) > 0 {
-			headers[key] = values[0]
+			headers[key] = strings.Join(values, ", ")
 		} else {
-			headers[key] = nil
+			headers[key] = ""
 		}
 	}
 	return headers
