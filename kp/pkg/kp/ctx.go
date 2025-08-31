@@ -263,7 +263,7 @@ func (c *Context) GetIncoming() IncomingReq {
 
 func (c *Context) JSON(code int, v any) error {
 	if c.ResponseWriter != nil {
-		// c.ResponseWriter.Header().Del("Content-Length")
+		c.ResponseWriter.Header().Del("Content-Length")
 		c.ResponseWriter.WriteHeader(code)
 		c.ResponseWriter.Header().Set("Content-Type", "application/json")
 
