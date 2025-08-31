@@ -112,8 +112,8 @@ func newContext(w http.ResponseWriter, r Request, k kafka.Client, log LogService
 		ComponentVersion: conf.App.Version,
 		Instance:         hostName,
 		Metadata:         meta,
-		SessionId: ctx.SessionId(),
-		RequestId: ctx.RequestId(),
+		SessionId:        ctx.SessionId(),
+		RequestId:        ctx.RequestId(),
 	}
 	kpLog.Init(customLog)
 	if !isHTTP {
@@ -263,11 +263,12 @@ func (c *Context) GetIncoming() IncomingReq {
 
 func (c *Context) JSON(code int, v any) error {
 	if c.ResponseWriter != nil {
-		c.ResponseWriter.Header().Set("Content-Type", "application/json; charset=UTF8")
+		// c.ResponseWriter.Header().Del("Content-Length")
 		c.ResponseWriter.WriteHeader(code)
+		c.ResponseWriter.Header().Set("Content-Type", "application/json")
 
 		if err := json.NewEncoder(c.ResponseWriter).Encode(v); err != nil {
-			return err
+			c.detail.AddField("Error", err.Error())
 		}
 		c.detail.Info(logger.NewOutbound("client", ""), v)
 	}
