@@ -100,7 +100,12 @@ func (c *customLoggerService) Info(action LoggerAction, data any, options ...Mas
 }
 
 func (c *customLoggerService) AddField(key string, value any) {
+	if c.additionalSummary == nil {
+		c.additionalSummary = make(map[string]any)
+	}
+
 	c.additionalSummary[key] = value
+
 }
 
 func (c *customLoggerService) toStr(action LoggerAction, data any, options ...MaskingOptionDto) string {
