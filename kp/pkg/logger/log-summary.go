@@ -48,6 +48,9 @@ func (s *summaryLogService) Update(key string, value any) {
 }
 func (s *summaryLogService) Flush(data Stack) {
 	s.Init(s.logDto)
+	if s.logDto.CustomFields == nil {
+		s.logDto.CustomFields = make(map[string]any)
+	}
 	s.logDto.LogType = "summary"
 	s.logDto.ResponseTime = time.Since(s.customLogger.utilService.begin).Microseconds()
 
@@ -116,7 +119,7 @@ func (s *summaryLogService) Flush(data Stack) {
 
 	if len(s.customLogger.additionalSummary) > 0 {
 		for key, value := range s.customLogger.additionalSummary {
-			s.logDto.CustomFields[key] = value
+			s.logDto.CustomFields[key] = value // fix bug
 		}
 	}
 
