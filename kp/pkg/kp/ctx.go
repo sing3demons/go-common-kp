@@ -264,16 +264,19 @@ func (c *Context) GetIncoming() IncomingReq {
 func (c *Context) JSON(code int, v any) error {
 	if c.ResponseWriter != nil {
 		c.ResponseWriter.Header().Del("Content-Length")
-		c.ResponseWriter.WriteHeader(code)
-		c.ResponseWriter.Header().Set("Content-Type", "application/json")
+		c.ResponseWriter.Header().Set("Content-Type", "application/json; charset=utf-8") // set first
+		c.ResponseWriter.WriteHeader(code)                                               // then send status
 
 		if err := json.NewEncoder(c.ResponseWriter).Encode(v); err != nil {
-			c.detail.AddField("Error", err.Error())
+			if c.detail != nil {
+				c.detail.AddField("Error", err.Error())
+			}
 		}
-		c.detail.Info(logger.NewOutbound("client", ""), v)
+		if c.detail != nil {
+			c.detail.Info(logger.NewOutbound("client", ""), v)
+			c.detail.End(code, "")
+		}
 	}
-
-	c.detail.End(code, "")
 
 	return nil
 }
