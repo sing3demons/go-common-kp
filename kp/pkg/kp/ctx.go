@@ -267,12 +267,12 @@ func (c *Context) JSON(code int, v any) error {
 		c.ResponseWriter.Header().Set("Content-Type", "application/json; charset=utf-8") // set first
 		c.ResponseWriter.WriteHeader(code)                                               // then send status
 
-		if err := json.NewEncoder(c.ResponseWriter).Encode(v); err != nil {
-			if c.detail != nil {
+		err := json.NewEncoder(c.ResponseWriter).Encode(v)
+
+		if c.detail != nil {
+			if err != nil {
 				c.detail.AddField("Error", err.Error())
 			}
-		}
-		if c.detail != nil {
 			c.detail.Info(logger.NewOutbound("client", ""), v)
 			c.detail.End(code, "")
 		}
